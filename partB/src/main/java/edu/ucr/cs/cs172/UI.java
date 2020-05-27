@@ -17,10 +17,12 @@ public class UI extends JFrame {
 	setSize(400,200);
 	setDefaultCloseOperation(EXIT_ON_CLOSE);
 
-														                jp.add(jt);
-														                add(jp);													        }
+	jp.add(jt);
+	add(jp);
+	}
 
 	public static void main(String[] args) {
+
 		UI tBox = new UI();
 	}
 }
