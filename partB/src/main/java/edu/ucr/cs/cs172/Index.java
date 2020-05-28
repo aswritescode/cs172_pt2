@@ -46,5 +46,30 @@ public class Index {
         return document;
     }
 
+    private static IndexSearcher createSearcher(String indexDir) throws IOException//creates index searcher from index
+    {
+        FSDirectory dir = FSDirectory.open(Paths.get(indexDir));
+        IndexReader reader = DirectoryReader.open(dir);
+        IndexSearcher searcher = new IndexSearcher(reader);
+        return searcher;
+    }
+
+    private static TopDocs searchIndex(String query, IndexSearcher searcher) throws Exception //returns the top docks of query
+    {
+        QueryParser qp = new QueryParser(query, new StandardAnalyzer());
+        Query idQuery = qp.parse(query);
+        TopDocs hits = searcher.search(idQuery, 10);
+        return hits;
+    }
+
+    private static TopDocs ranker()
+    {
+        //TODO
+    }
+
+    private static Document getDocument(ScoreDoc scoreDoc) throws CorruptIndexException, IOException //returns the top doc
+    {
+        return indexSearcher.doc(scoreDoc.doc);
+    }
 
 }
