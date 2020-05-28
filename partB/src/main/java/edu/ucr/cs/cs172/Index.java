@@ -7,7 +7,15 @@ import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.Query;
+import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.queryparser.classic.QueryParser;
 
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -46,7 +54,7 @@ public class Index {
         return document;
     }
 
-    private static IndexSearcher createSearcher(String indexDir) throws IOException//creates index searcher from index
+    public static IndexSearcher createSearcher(String indexDir) throws IOException//creates index searcher from index
     {
         FSDirectory dir = FSDirectory.open(Paths.get(indexDir));
         IndexReader reader = DirectoryReader.open(dir);
@@ -54,7 +62,7 @@ public class Index {
         return searcher;
     }
 
-    private static TopDocs searchIndex(String query, IndexSearcher searcher) throws Exception //returns the top docks of query
+    public static TopDocs searchIndex(String query, IndexSearcher searcher) throws Exception //returns the top docks of query
     {
         QueryParser qp = new QueryParser(query, new StandardAnalyzer());
         Query idQuery = qp.parse(query);
@@ -62,14 +70,14 @@ public class Index {
         return hits;
     }
 
-    private static TopDocs ranker()
-    {
+    //private static TopDocs ranker()
+    //{
         //TODO
-    }
+    //}
 
-    private static Document getDocument(ScoreDoc scoreDoc) throws CorruptIndexException, IOException //returns the top doc
+    public Document getDocument(ScoreDoc scoreDoc, IndexSearcher searcher) throws CorruptIndexException, IOException //returns the top doc
     {
-        return indexSearcher.doc(scoreDoc.doc);
+        return searcher.doc(scoreDoc.doc);
     }
 
 }
