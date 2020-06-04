@@ -75,7 +75,7 @@ public class Index {
         //TODO
     //}
 
-    public Document getDocument(ScoreDoc scoreDoc, IndexSearcher searcher) throws CorruptIndexException, IOException //returns the top doc
+    public static Document getDocument(ScoreDoc scoreDoc, IndexSearcher searcher) throws CorruptIndexException, IOException //returns the top doc
     {
         return searcher.doc(scoreDoc.doc);
     }
