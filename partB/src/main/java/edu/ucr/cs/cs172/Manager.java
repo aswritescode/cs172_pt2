@@ -90,6 +90,7 @@ public class Manager {
                 tweet = tweet + "Location" + d.get("location");
 
                 tweetsout[i] = tweet;
+                System.out.println(tweet);
             }
            // searcher.close();
 
