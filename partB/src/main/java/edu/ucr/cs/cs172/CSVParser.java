@@ -36,7 +36,7 @@ public class CSVParser {
                 // use comma as separator
                 String[] values  = line.split(cvsSplitBy);
                 results.add(values);
-                //ConsoleUtil.debug(values[0] + " " + values[1] + " " + values[2] + " " + values[3] + " " + values[4]);
+              //  ConsoleUtil.debug( "ONE" + values[0] + " " + "TWO" + values[1] + " " + "THREE" + values[2] + " " + "FOUR" + values[3] + " " + "FIVE" + values[4]);
             }
 
         } catch (IOException e) {

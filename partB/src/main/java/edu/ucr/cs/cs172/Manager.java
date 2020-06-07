@@ -7,7 +7,7 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
-import org.apache.lucene.index.IndexWriter;
+//import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.DirectoryReader;
@@ -20,6 +20,7 @@ import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.queryparser.classic.QueryParser;
 
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -45,54 +46,96 @@ public class Manager {
 
 
         Scanner sc= new Scanner(System.in); //System.in is a standard input stream.
-        System.out.print("Enter a string: ");
+        System.out.print("Enter a QUERY: ");
         String query = sc.nextLine(); //reads string.
+        System.out.println(query);
 
         // Try reading a CSV File
-        CSVParser parser = new CSVParser("0_tweets.tsv");
+        CSVParser parser = new CSVParser("977_tweets.tsv");
         parser.setCvsSplitBy("\t");                 // Set delimiter to tab for TSV file
         ArrayList<String[]> tweets = parser.read(); // Get the tweets
 
-        IndexWriter writer = null;
+        //IndexWriter writer = null;
 
         try {
-            writer = Index.createWriter(INDEX_DIR);
-
+           // writer = Index.createWriter(INDEX_DIR);
+            FSDirectory dir = FSDirectory.open(Paths.get(INDEX_DIR));
+            IndexWriterConfig config = new IndexWriterConfig(new StandardAnalyzer());
+            IndexWriter writer = new IndexWriter(dir, config);
+            System.out.println("in try");
+            //int b = 0;
             for (String[] tweet : tweets ) {
                 writer.addDocument(Index.createDocument(tweet)); // Turn the tweets into documents, then add them to
                                                                  // the index.
+                //b += 1;
+              //  System.out.println(b);
+                //System.out.println(" ");
+
+
+               /* public static Document createDocument(String[] values)
+                {
+                    Document document = new Document();
+                    document.add(new StringField("username", values[0] , Field.Store.YES));
+                    document.add(new TextField("bio", values[1] , Field.Store.YES));
+                    document.add(new TextField("location", values[2] , Field.Store.YES));
+                    document.add(new TextField("body", values[3] , Field.Store.YES));
+                    document.add(new TextField("urlTitle", values[4] , Field.Store.YES));
+                    return document;
+                }*/
+
+
+
+               // System.out.println("hello");
             }
 
             writer.commit();        // Commit the documents to the index
-            ConsoleUtil.debug("Done comitting...");
-
+            ConsoleUtil.debug("Done committing...");
+            writer.close();
+            dir.close();
 
 
         } catch (IOException e) {
             e.printStackTrace();
         }
-        //IndexReader reader = IndexReader.open(FDSirectory.open(new File(index_dir)));
+        //IndexReader reader = IndexReader.open(FSDirectory.open(new File(index_dir)));
         //IndexSearcher searcher = null;
         try {
-          IndexSearcher searcher = Index.createSearcher(INDEX_DIR); //create searcher
-                TopDocs topresults = Index.searchIndex(query, searcher);
+          //IndexSearcher searcher = Index.createSearcher(INDEX_DIR); //create searcher
+            FSDirectory dir1 = FSDirectory.open(Paths.get(INDEX_DIR));
+            IndexReader reader = DirectoryReader.open(dir1);
+            IndexSearcher searcher = new IndexSearcher(reader);
 
-            int numresults = topresults.scoreDocs.length;
+            //TopDocs top_results = Index.searchIndex(query, searcher);
+            QueryParser qp = new QueryParser("body", new StandardAnalyzer());
+            Query idQuery = qp.parse(query);
+            TopDocs top_results = searcher.search(idQuery, 10);
+
+
+            System.out.println("hello");
+
+            int numresults = top_results.scoreDocs.length;
+
+            System.out.println(numresults);
 
             String[] tweetsout = new String [numresults];
-            ScoreDoc[] hits = topresults.scoreDocs;
+
+            System.out.println(tweetsout.length);
+            ScoreDoc[] hits = top_results.scoreDocs;
+
             for (int i = 0; i < numresults; i++) {
                 Document d = Index.getDocument(hits[i], searcher);
-                String tweet = "User: " + d.get("username");
-                tweet += "\n";
-                tweet = tweet + "Tweet: " + d.get("body");
-                tweet += "\n";
-                tweet = tweet + "Location" + d.get("location");
+                String tweetss = "User: " + d.get("username");
+                tweetss += "\n";
+                tweetss = tweetss + "Tweet: " + d.get("body");
+                tweetss += "\n";
+                tweetss = tweetss + "Location" + d.get("location");
 
-                tweetsout[i] = tweet;
-                System.out.println(tweet);
+                tweetsout[i] = tweetss;
+                System.out.println(tweetsout[i]);
+              //  System.out.println("i ");
             }
            // searcher.close();
+            dir1.close();
 
         }
         catch (IOException e) {
