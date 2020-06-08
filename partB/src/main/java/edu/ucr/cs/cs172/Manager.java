@@ -32,10 +32,11 @@ public class Manager {
 
     public static String index_dir = INDEX_DIR;
 
-    public static void main(String[] args) throws Exception{
-
+    public static void main(String[] args) throws Exception {
+        UI temp = new UI();
+        boolean tButton = temp.enterButton;
         // Handle the input parameters
-        switch(args.length) {
+        switch (args.length) {
             case 1: // Set the index location
                 index_dir = args[0];
             case 0:
@@ -44,59 +45,60 @@ public class Manager {
         }
 
 
-        Scanner sc= new Scanner(System.in); //System.in is a standard input stream.
-        System.out.print("Enter a string: ");
-        String query = sc.nextLine(); //reads string.
+        //Scanner sc = new Scanner(System.in); //System.in is a standard input stream.
+        //System.out.print("Enter a string: ");
 
-        // Try reading a CSV File
-        CSVParser parser = new CSVParser("0_tweets.tsv");
-        parser.setCvsSplitBy("\t");                 // Set delimiter to tab for TSV file
-        ArrayList<String[]> tweets = parser.read(); // Get the tweets
+        if (temp.enterButton = true) {
+            String query = temp.userInput.nextLine(); //reads string.
 
-        IndexWriter writer = null;
+            // Try reading a CSV File
+            CSVParser parser = new CSVParser("0_tweets.tsv");
+            parser.setCvsSplitBy("\t");                 // Set delimiter to tab for TSV file
+            ArrayList<String[]> tweets = parser.read(); // Get the tweets
 
-        try {
-            writer = Index.createWriter(INDEX_DIR);
+            IndexWriter writer = null;
 
-            for (String[] tweet : tweets ) {
-                writer.addDocument(Index.createDocument(tweet)); // Turn the tweets into documents, then add them to
-                                                                 // the index.
+            try {
+                writer = Index.createWriter(INDEX_DIR);
+
+                for (String[] tweet : tweets) {
+                    writer.addDocument(Index.createDocument(tweet)); // Turn the tweets into documents, then add them to
+                    // the index.
+                }
+
+                writer.commit();        // Commit the documents to the index
+                ConsoleUtil.debug("Done comitting...");
+
+
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-
-            writer.commit();        // Commit the documents to the index
-            ConsoleUtil.debug("Done comitting...");
-
-
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        //IndexReader reader = IndexReader.open(FDSirectory.open(new File(index_dir)));
-        //IndexSearcher searcher = null;
-        try {
-          IndexSearcher searcher = Index.createSearcher(INDEX_DIR); //create searcher
+            //IndexReader reader = IndexReader.open(FDSirectory.open(new File(index_dir)));
+            //IndexSearcher searcher = null;
+            try {
+                IndexSearcher searcher = Index.createSearcher(INDEX_DIR); //create searcher
                 TopDocs topresults = Index.searchIndex(query, searcher);
 
-            int numresults = topresults.scoreDocs.length;
+                int numresults = topresults.scoreDocs.length;
 
-            String[] tweetsout = new String [numresults];
-            ScoreDoc[] hits = topresults.scoreDocs;
-            for (int i = 0; i < numresults; i++) {
-                Document d = Index.getDocument(hits[i], searcher);
-                String tweet = "User: " + d.get("username");
-                tweet += "\n";
-                tweet = tweet + "Tweet: " + d.get("body");
-                tweet += "\n";
-                tweet = tweet + "Location" + d.get("location");
+                String[] tweetsout = new String[numresults];
+                ScoreDoc[] hits = topresults.scoreDocs;
+                for (int i = 0; i < numresults; i++) {
+                    Document d = Index.getDocument(hits[i], searcher);
+                    String tweet = "User: " + d.get("username");
+                    tweet += "\n";
+                    tweet = tweet + "Tweet: " + d.get("body");
+                    tweet += "\n";
+                    tweet = tweet + "Location" + d.get("location");
 
-                tweetsout[i] = tweet;
-                System.out.println(tweet);
+                    tweetsout[i] = tweet;
+                    System.out.println(tweet);
+                }
+                // searcher.close();
+
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-           // searcher.close();
-
-        }
-        catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
