@@ -8,10 +8,13 @@ import javax.swing.JTextField;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
+import java.util.Scanner;
 
 
 public class UI extends JFrame {
+	public boolean enterButton = false;
+	public Scanner userInput = new Scanner(System.in);
+
 	JPanel jp = new JPanel();
 	JLabel jl = new JLabel();
 	JTextField jt = new JTextField(30);
@@ -27,8 +30,10 @@ public class UI extends JFrame {
 
 	jt.addActionListener(new ActionListener() {
 		public void actionPerformed(ActionEvent temp) {
-			String userInput = jt.getText();
-			jl.setText(userInput);
+			enterButton = true;
+			String userString = userInput.nextLine();
+			//userString = jt.getText();
+			jl.setText(userString);
 			}
 		});
 
