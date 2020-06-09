@@ -48,7 +48,10 @@ public class Manager {
         //Scanner sc = new Scanner(System.in); //System.in is a standard input stream.
         //System.out.print("Enter a string: ");
 
-        if (temp.enterButton = true) {
+        /*^Commented out Scanner variable declaration and declared in UI as a global variable
+         in an attempt to link UI to search functionality*/
+
+        if (temp.enterButton = true) { //Conditional statement that's supposed to link search functionality to UI
             String query = temp.userInput.nextLine(); //reads string.
 
             // Try reading a CSV File
