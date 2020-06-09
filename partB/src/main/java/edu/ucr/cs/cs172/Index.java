@@ -31,12 +31,13 @@ public class Index {
     }
 
     // Generates a document object given a set of input fields. These fields are Twitter object fields that can be parsed from a CSV file.
-    public static Document createDocument(String username, String bio, String location, String body, String urlTitle)
+    public static Document createDocument(String username, String bio, String location, String date, String body, String urlTitle)
     {
         Document document = new Document();
         document.add(new StringField("username", username , Field.Store.YES));
         document.add(new TextField("bio", bio , Field.Store.YES));
         document.add(new TextField("location", location , Field.Store.YES));
+        document.add(new TextField("date", date, Field.Store.YES));
         document.add(new TextField("body", body , Field.Store.YES));
         document.add(new TextField("urlTitle", urlTitle , Field.Store.YES));
         return document;
@@ -49,8 +50,9 @@ public class Index {
         document.add(new StringField("username", values[0] , Field.Store.YES));
         document.add(new TextField("bio", values[1] , Field.Store.YES));
         document.add(new TextField("location", values[2] , Field.Store.YES));
-        document.add(new TextField("body", values[3] , Field.Store.YES));
-        document.add(new TextField("urlTitle", values[4] , Field.Store.YES));
+        document.add(new TextField("date", values[3], Field.Store.YES));
+        document.add(new TextField("body", values[4] , Field.Store.YES));
+        //document.add(new TextField("urlTitle", values[5] , Field.Store.YES));
         return document;
     }
 

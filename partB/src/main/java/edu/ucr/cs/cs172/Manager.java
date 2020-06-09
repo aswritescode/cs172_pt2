@@ -33,10 +33,10 @@ public class Manager {
 
     public static String index_dir = INDEX_DIR;
 
-    public static void main(String[] args) throws Exception{
-
+    public static void main(String[] args) throws Exception {
+        //UI temp1 = new UI();
         // Handle the input parameters
-        switch(args.length) {
+        switch (args.length) {
             case 1: // Set the index location
                 index_dir = args[0];
             case 0:
@@ -46,30 +46,29 @@ public class Manager {
 
 
         Scanner sc= new Scanner(System.in); //System.in is a standard input stream.
-        System.out.print("Enter a QUERY: ");
+        System.out.print("Enter a string: ");
         String query = sc.nextLine(); //reads string.
-        System.out.println(query);
 
-        // Try reading a CSV File
-        CSVParser parser = new CSVParser("977_tweets.tsv");
-        parser.setCvsSplitBy("\t");                 // Set delimiter to tab for TSV file
-        ArrayList<String[]> tweets = parser.read(); // Get the tweets
+            // Try reading a CSV File
+            CSVParser parser = new CSVParser("853_tweets.tsv");
+            parser.setCvsSplitBy("\t");                 // Set delimiter to tab for TSV file
+            ArrayList<String[]> tweets = parser.read(); // Get the tweets
 
-        //IndexWriter writer = null;
+            //IndexWriter writer = null;
 
-        try {
-           // writer = Index.createWriter(INDEX_DIR);
-            FSDirectory dir = FSDirectory.open(Paths.get(INDEX_DIR));
-            IndexWriterConfig config = new IndexWriterConfig(new StandardAnalyzer());
-            IndexWriter writer = new IndexWriter(dir, config);
-            System.out.println("in try");
-            //int b = 0;
-            for (String[] tweet : tweets ) {
-                writer.addDocument(Index.createDocument(tweet)); // Turn the tweets into documents, then add them to
-                                                                 // the index.
-                //b += 1;
-              //  System.out.println(b);
-                //System.out.println(" ");
+            try {
+                // writer = Index.createWriter(INDEX_DIR);
+                FSDirectory dir = FSDirectory.open(Paths.get(INDEX_DIR));
+                IndexWriterConfig config = new IndexWriterConfig(new StandardAnalyzer());
+                IndexWriter writer = new IndexWriter(dir, config);
+                System.out.println("in try");
+                //int b = 0;
+                for (String[] tweet : tweets) {
+                    writer.addDocument(Index.createDocument(tweet)); // Turn the tweets into documents, then add them to
+                    // the index.
+                    //b += 1;
+                    //  System.out.println(b);
+                    //System.out.println(" ");
 
 
                /* public static Document createDocument(String[] values)
@@ -84,63 +83,86 @@ public class Manager {
                 }*/
 
 
+                    // System.out.println("hello");
+                }
 
-               // System.out.println("hello");
+                writer.commit();        // Commit the documents to the index
+                ConsoleUtil.debug("Done committing...");
+                writer.close();
+                dir.close();
+
+
+            } catch (IOException e) {
+                e.printStackTrace();
             }
+            //IndexReader reader = IndexReader.open(FSDirectory.open(new File(index_dir)));
+            //IndexSearcher searcher = null;
+            try {
+                //IndexSearcher searcher = Index.createSearcher(INDEX_DIR); //create searcher
+                FSDirectory dir1 = FSDirectory.open(Paths.get(INDEX_DIR));
+                IndexReader reader = DirectoryReader.open(dir1);
+                IndexSearcher searcher = new IndexSearcher(reader);
 
-            writer.commit();        // Commit the documents to the index
-            ConsoleUtil.debug("Done committing...");
-            writer.close();
-            dir.close();
-
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        //IndexReader reader = IndexReader.open(FSDirectory.open(new File(index_dir)));
-        //IndexSearcher searcher = null;
-        try {
-          //IndexSearcher searcher = Index.createSearcher(INDEX_DIR); //create searcher
-            FSDirectory dir1 = FSDirectory.open(Paths.get(INDEX_DIR));
-            IndexReader reader = DirectoryReader.open(dir1);
-            IndexSearcher searcher = new IndexSearcher(reader);
-
-            //TopDocs top_results = Index.searchIndex(query, searcher);
-            QueryParser qp = new QueryParser("body", new StandardAnalyzer());
-            Query idQuery = qp.parse(query);
-            TopDocs top_results = searcher.search(idQuery, 10);
+                //TopDocs top_results = Index.searchIndex(query, searcher);
+                QueryParser qp = new QueryParser("body", new StandardAnalyzer());
+                Query idQuery = qp.parse(query);
+                TopDocs top_results = searcher.search(idQuery, 10);
 
 
-            System.out.println("hello");
+                System.out.println("hello");
 
-            int numresults = top_results.scoreDocs.length;
+                int numresults = top_results.scoreDocs.length;
 
-            System.out.println(numresults);
+                System.out.println(numresults);
 
-            String[] tweetsout = new String [numresults];
+                String[] tweetsout = new String[numresults];
 
-            System.out.println(tweetsout.length);
-            ScoreDoc[] hits = top_results.scoreDocs;
+                System.out.println(tweetsout.length);
+                ScoreDoc[] hits = top_results.scoreDocs;
+                ScoreDoc[] temp = hits;
 
-            for (int i = 0; i < numresults; i++) {
-                Document d = Index.getDocument(hits[i], searcher);
-                String tweetss = "User: " + d.get("username");
-                tweetss += "\n";
-                tweetss = tweetss + "Tweet: " + d.get("body");
-                tweetss += "\n";
-                tweetss = tweetss + "Location" + d.get("location");
+                for (int i = 0; i < numresults; i++) {
 
-                tweetsout[i] = tweetss;
-                System.out.println(tweetsout[i]);
-              //  System.out.println("i ");
+                    if (i != numresults - 1) {
+                        Document d = Index.getDocument(hits[i], searcher);
+                        Document z = Index.getDocument(hits[i + 1], searcher);
+                        String dates1 = d.get("date");
+                        String dates2 = z.get("date");
+                        String delims = "[ ]";
+                        String[] tokens1 = dates1.split(delims);
+                        String[] tokens2 = dates2.split(delims);
+
+                        String delims2 = "[:]";
+                        String[] datebreak1 = tokens1[3].split(delims2);
+                        String[] datebreak2 = tokens2[3].split(delims2);
+
+                        if ( (Integer.parseInt(datebreak1[1]) < Integer.parseInt(datebreak2[1])) || (Integer.parseInt(datebreak1[1]) < Integer.parseInt(datebreak2[1])) ) {
+                            hits[i] = hits[i + 1];
+                            hits[i + 1] = temp[i];
+                        }
+                        temp = hits;
+                    }
+                }
+
+                for (int i = 0; i < numresults; i++) {
+                    Document d = Index.getDocument(hits[i], searcher);
+                    String tweetss = "User: " + d.get("username");
+                    tweetss += "\n";
+                    tweetss = tweetss + "Tweet: " + d.get("body");
+                    tweetss += "\n";
+                    tweetss = tweetss + "Date: " + d.get("date");
+
+                    tweetsout[i] = tweetss;
+                    System.out.println(tweetsout[i]);
+                    System.out.println(" ");
+                    //  System.out.println("i ");
+                }
+                // searcher.close();
+                dir1.close();
+
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-           // searcher.close();
-            dir1.close();
-
-        }
-        catch (IOException e) {
-            e.printStackTrace();
         }
     }
-
-}
+//}
